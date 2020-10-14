@@ -43,17 +43,27 @@ class MainWindow(QMainWindow):
         return main_menu
 
     def setup_plugins(self):
-        plugins = get_plugins([])
-        for name, group in plugins.items():
+        plugin_groups = get_plugins([])
+        plugins = []
+        for name, group in plugin_groups.items():
             group_menu = self.menu.addMenu(name)
             for plugin in group:
+                plugins.append(plugin)
                 plugin_menu = group_menu.addMenu(plugin.plugin_name)
                 for p_action in plugin.get_actions():
                     q_action = QAction(p_action.name, self)
                     q_action.setStatusTip(plugin.plugin_name)
                     q_action.triggered.connect(partial(p_action.function, self))
                     plugin_menu.addAction(q_action)
+        plugins.sort(key=lambda x: x.z_index)
+        self.virtual_camera.set_mapping(self.plugin_process)
         return plugins
+
+    def plugin_process(self, frame):
+        out = frame
+        for plugin in self.plugins:
+            out = plugin.process(out)
+        return out
 
     def choose_camera(self, cam):
         self.release_camera()
