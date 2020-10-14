@@ -3,10 +3,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap, QImage
 from subprocess import Popen, PIPE
 from functools import partial
-from main import VirtualCamera
 import cv2
 import sys
 import time
+from source.main import VirtualCamera
+from source.plugins.plugin import get_plugins
+
 
 class MainWindow(QMainWindow):
 
@@ -22,21 +24,46 @@ class MainWindow(QMainWindow):
         self.central = QWidget()
         self.setCentralWidget(self.central)
         self.setup_ui()
-        self.setup_menu()
+        self.menu = self.setup_menu()
+        self.plugins = self.setup_plugins()
 
     def setup_menu(self):
         self.statusBar()
-        mainMenu = self.menuBar()
-        cameraMenu = mainMenu.addMenu('Camera')
+        main_menu = self.menuBar()
+        camera_menu = main_menu.addMenu('Camera')
         cams = list(filter(lambda x: x[1] != self.out_port, list_cams())) + [("None", -1)]
         print(cams)
         for cam in cams:
             action = QAction(cam[0], self)
             action.setStatusTip('Choose this input camera')
             action.triggered.connect(partial(self.choose_camera, cam))
-            cameraMenu.addAction(action)
+            camera_menu.addAction(action)
         if len(cams) > 0:
             self.choose_camera(cams[0])
+        return main_menu
+
+    def setup_plugins(self):
+        plugin_groups = get_plugins([])
+        plugins = []
+        for name, group in plugin_groups.items():
+            group_menu = self.menu.addMenu(name)
+            for plugin in group:
+                plugins.append(plugin)
+                plugin_menu = group_menu.addMenu(plugin.plugin_name)
+                for p_action in plugin.get_actions():
+                    q_action = QAction(p_action.name, self)
+                    q_action.setStatusTip(plugin.plugin_name)
+                    q_action.triggered.connect(partial(p_action.function, self))
+                    plugin_menu.addAction(q_action)
+        plugins.sort(key=lambda x: x.z_index)
+        self.virtual_camera.set_mapping(self.plugin_process)
+        return plugins
+
+    def plugin_process(self, frame):
+        out = frame
+        for plugin in self.plugins:
+            out = plugin.process(out)
+        return out
 
     def choose_camera(self, cam):
         self.release_camera()
