@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
                     q_action = QAction(p_action.name, self)
                     q_action.setStatusTip(plugin.plugin_name)
                     q_action.triggered.connect(partial(p_action.function, self))
+                    q_action.setCheckable(p_action.toggle)
                     plugin_menu.addAction(q_action)
         plugins.sort(key=lambda x: x.z_index)
         self.virtual_camera.set_mapping(self.plugin_process)

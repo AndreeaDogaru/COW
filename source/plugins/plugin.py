@@ -24,7 +24,7 @@ def add_plugin(plugin_groups, plugin):
     plugin_groups[plugin.group_name].append(plugin)
 
 
-PluginAction = namedtuple('PluginAction', ['name', 'function'])
+PluginAction = namedtuple('PluginAction', ['name', 'function', 'toggle'])
 
 
 class Plugin:
