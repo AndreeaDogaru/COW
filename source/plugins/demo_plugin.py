@@ -8,7 +8,7 @@ class DemoPlugin(Plugin):
         super().__init__("Demo", "Misc")
 
     def get_actions(self):
-        return [PluginAction("Echo", self.template_function)]
+        return [PluginAction("Echo", self.template_function, False)]
 
     def template_function(self, window):
         dlg = QDialog(window)
