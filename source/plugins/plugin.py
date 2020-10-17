@@ -13,7 +13,8 @@ def get_plugins(block_list):
             module_name = filename[:-3]
             if not (module_name in block):
                 module = importlib.import_module(f"source.plugins.{module_name}")
-                plugin = inspect.getmembers(module, inspect.isclass)[0][1]()
+                members = inspect.getmembers(module, inspect.isclass)
+                plugin = [m[1] for m in members if m[1].__module__.endswith(module_name)][0]()
                 add_plugin(plugin_groups, plugin)
     return plugin_groups
 
