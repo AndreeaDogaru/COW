@@ -38,3 +38,12 @@ class Plugin:
 
     def process(self, frame):
         return frame
+
+    def save(self):
+        # Returns an object that stores all customized options
+        # It can be any serializable object
+        return {}
+
+    def load(self, plugin_state):
+        # Loads a previously saved state
+        pass
