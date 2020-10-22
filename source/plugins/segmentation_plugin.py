@@ -19,7 +19,7 @@ class SegmentationPlugin(Plugin):
         super().__init__("Segmentation", "Misc", z_index=-1)
         self.network = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=True).eval()
         self.display = False
-        self.cuda = torch.has_cuda
+        self.cuda = torch.cuda.is_available()
         self.preprocess = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
