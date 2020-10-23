@@ -24,10 +24,7 @@ conda install -c conda-forge opencv
 pip install pyfakewebcam
 ```
 
-2. Install and configure  **v4l2loopback**.
+2. Install  **v4l2loopback**.
 ```
 sudo apt install v4l2loopback-dkms
-
-sudo modprobe -r v4l2loopback
-sudo modprobe v4l2loopback devices=1 video_nr=20 card_label="v4l2loopback" exclusive_caps=1
 ```

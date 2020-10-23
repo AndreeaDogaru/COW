@@ -1,5 +1,6 @@
 import pickle
 import sys
+from subprocess import Popen
 
 import pyfakewebcam
 import cv2
@@ -20,6 +21,7 @@ class VirtualCamera:
     def start_stream(self, in_port, out_port):
         self.stop_stream()
         self.stop_signal = False
+        self.open_port(out_port)
         w, h = self._compute_resolution(in_port)
         self.fake_camera = pyfakewebcam.FakeWebcam(f"/dev/video{out_port}", w, h)
         self.start_stream_thread()
@@ -61,6 +63,12 @@ class VirtualCamera:
             self.camera_input.release()
             os.close(self.fake_camera._video_device)
             self.fake_camera = None
+
+    def open_port(self, port):
+        if not os.path.exists(f"/dev/video{port}"):
+            proc = Popen(
+                f'sudo -S /usr/sbin/modprobe v4l2loopback devices=1 video_nr={port} card_label="cow" exclusive_caps=1'.split())
+            proc.wait()
 
 
 def load_config(v_camera, path):
