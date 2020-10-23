@@ -5,23 +5,40 @@ import os
 from typing import List
 
 
+def get_plugin_groups(block_list):
+    groups = {}
+    for plugin in get_plugins(block_list):
+        add_plugin(groups, plugin)
+    return groups
+
+
 def get_plugins(block_list):
     block = set(block_list + ["plugin"])
-    plugin_groups = {}
+    plugins = []
     for filename in os.listdir("plugins"):
         if filename.endswith(".py"):
             module_name = filename[:-3]
             if not (module_name in block):
                 module = importlib.import_module(f"source.plugins.{module_name}")
-                plugin = inspect.getmembers(module, inspect.isclass)[0][1]()
-                add_plugin(plugin_groups, plugin)
-    return plugin_groups
+                members = inspect.getmembers(module, inspect.isclass)
+                plugin = [m[1] for m in members if m[1].__module__.endswith(module_name)][0]()
+                plugins.append(plugin)
+    return plugins
 
 
 def add_plugin(plugin_groups, plugin):
     if plugin.group_name not in plugin_groups:
         plugin_groups[plugin.group_name] = []
     plugin_groups[plugin.group_name].append(plugin)
+
+
+def make_chain_process(plugins):
+    def chained(frame):
+        out = frame
+        for plugin in plugins:
+            out = plugin.process(out)
+        return out
+    return chained
 
 
 PluginAction = namedtuple('PluginAction', ['name', 'function', 'toggle'])

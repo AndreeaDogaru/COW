@@ -1,15 +1,16 @@
-from PyQt5.QtWidgets import *
+import os
+import pickle
+import sys
+from functools import partial
+from subprocess import Popen, PIPE
+
+import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap, QImage
-from subprocess import Popen, PIPE
-from functools import partial
-import cv2
-import os
-import sys
-import time
+from PyQt5.QtWidgets import *
+
 from source.main import VirtualCamera
-from source.plugins.plugin import get_plugins
-import pickle
+from source.plugins.plugin import get_plugin_groups
 
 
 class MainWindow(QMainWindow):
@@ -73,7 +74,7 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save configuration to file", "",
                                                    "Config File (*.conf);")
         if file_name:
-            pickle.dump(all_config, open(file_name, "wb"))
+            pickle.dump(all_config, open(file_name + ".conf", "wb"))
 
     def load_configuration(self, latest=True):
         if latest:
@@ -90,7 +91,7 @@ class MainWindow(QMainWindow):
                 plugin.load(state)
 
     def setup_plugins(self):
-        plugin_groups = get_plugins([])
+        plugin_groups = get_plugin_groups([])
         plugins = []
         for name, group in plugin_groups.items():
             group_menu = self.menu.addMenu(name)
