@@ -42,3 +42,9 @@ class FPSPlugin(Plugin):
         frame = cv2.putText(frame, self.fps, xy, font, font_scale, font_color, lineType=line_type)
         frame = cv2.flip(frame, 1)
         return frame
+
+    def save(self):
+        return {"display": self.display}
+
+    def load(self, plugin_state):
+        self.display = plugin_state.get("display", False)

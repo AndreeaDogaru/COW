@@ -1,7 +1,12 @@
+import pickle
+import sys
+
 import pyfakewebcam
 import cv2
 import threading
 import os
+
+from source.plugins.plugin import get_plugins, make_chain_process
 
 
 class VirtualCamera:
@@ -58,9 +63,24 @@ class VirtualCamera:
             self.fake_camera = None
 
 
+def load_config(v_camera, path):
+    if not os.path.exists(path):
+        print(f"File {path} not found")
+    all_config = pickle.load(open(path, "rb"))
+    plugins = get_plugins([])
+    for plugin in plugins:
+        state = all_config.get(plugin.__class__, None)
+        if state is not None:
+            plugin.load(state)
+    plugins.sort(key=lambda x: x.z_index)
+    v_camera.set_mapping(make_chain_process(plugins))
+
+
 if __name__ == "__main__":
     INPUT = 0
     OUTPUT = 20
 
     virtual = VirtualCamera()
+    if len(sys.argv) > 0:
+        load_config(virtual, sys.argv[1])
     virtual.start_stream(INPUT, OUTPUT)

@@ -19,7 +19,7 @@ class SegmentationPlugin(Plugin):
         super().__init__("Segmentation", "Misc", z_index=-1)
         self.network = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=True).eval()
         self.display = False
-        self.cuda = torch.has_cuda
+        self.cuda = torch.cuda.is_available()
         self.preprocess = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -29,8 +29,8 @@ class SegmentationPlugin(Plugin):
         self.scale_factor = 1 / 4
         self.path = 'plugins/plugin_data/SegmentationPlugin'
         os.makedirs(self.path, exist_ok=True)
-        prev_background = get_latest_file(self.path, ext_fmt="*.png")
-        self.background = cv2.imread(prev_background)[:, :, ::-1] if prev_background else np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
+        self.background_path = None
+        self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
 
     def toggle_display(self, window):
         self.display = not self.display
@@ -39,12 +39,27 @@ class SegmentationPlugin(Plugin):
         return [PluginAction("Active", self.toggle_display, True),
                 PluginAction("Select background", self.select_background, False)]
 
+    def save(self):
+        return {"background_path": self.background_path,
+                "display": self.display}
+
+    def load(self, plugin_state):
+        self.background_path = plugin_state.get("background_path", None)
+        self.display = plugin_state.get("display", False)
+
+        if self.background_path is not None:
+            img = cv2.imread(self.background_path)
+            self.background = img[:, :, ::-1]
+        else:
+            self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
+
     def select_background(self, window):
         file_name, _ = QtWidgets.QFileDialog.getOpenFileName(window, "Select Image", "",
                                                              "Image Files (*.png *.jpg *.jpeg *.JPEG)")
         if file_name:
             img = cv2.imread(file_name)
-            cv2.imwrite(os.path.join(self.path, str(time.time()) + '.png'), img)
+            self.background_path = os.path.join(self.path, str(time.time()) + '.png')
+            cv2.imwrite(self.background_path, img)
             self.background = img[:, :, ::-1]
 
     def get_mask(self, input_image):
