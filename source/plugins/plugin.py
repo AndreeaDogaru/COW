@@ -21,7 +21,8 @@ def get_plugins(block_list):
             if not (module_name in block):
                 module = importlib.import_module(f"source.plugins.{module_name}")
                 members = inspect.getmembers(module, inspect.isclass)
-                plugin = [m[1] for m in members if m[1].__module__.endswith(module_name)][0]()
+                plugin = [m[1] for m in members
+                          if m[1].__module__.endswith(module_name) and issubclass(m[1], Plugin)][0]()
                 plugins.append(plugin)
     return plugins
 
