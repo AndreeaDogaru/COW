@@ -22,7 +22,6 @@ class FPSPlugin(Plugin):
     def process(self, frame):
         if self.display:
             frame = self.write_fps(frame)
-            frame[:, :, 0] = 0
         self.counter += 1
         current = time.time()
         if current - self.last_time > self.update_time:

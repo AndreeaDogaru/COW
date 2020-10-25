@@ -11,6 +11,9 @@ class AdjustmentsPlugin(Plugin):
         super().__init__("Adjustments", "Misc")
         self.dlg: AdjustmentsDialog = None
         self.slider_limit = slider_limit
+        self.brightness = 0
+        self.contrast = 0
+        self.saturation = 0
 
     def get_actions(self):
         return [PluginAction("Image Tuning", self.show_dialog, False)]
@@ -18,6 +21,7 @@ class AdjustmentsPlugin(Plugin):
     def show_dialog(self, window):
         if not self.dlg:
             self.dlg = AdjustmentsDialog(self.slider_limit, window)
+            self.set_sliders()
         if self.dlg.isHidden():
             pw = self.dlg.parent().geometry().width()
             ph = self.dlg.parent().geometry().height()
@@ -29,16 +33,40 @@ class AdjustmentsPlugin(Plugin):
 
     def process(self, frame):
         if self.dlg:
-            frame = frame.astype(np.int)
-            delta_brightness = self.dlg.brightness_slider.value()
-            delta_contrast = (self.dlg.contrast_slider.value() + self.slider_limit) / self.slider_limit
-            delta_saturation = self.dlg.saturation_slider.value()
-            frame = delta_contrast * frame + delta_brightness
-            frame = np.clip(frame, 0, 255).astype(np.uint8)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-            frame[:, :, 1] = (frame[:, :, 1].astype(np.int) + delta_saturation).clip(0, 255).astype(np.uint8)
-            frame = cv2.cvtColor(frame, cv2.COLOR_HSV2RGB)
+            self.get_sliders()
+        frame = frame.astype(np.int)
+        delta_contrast = (self.contrast + self.slider_limit) / self.slider_limit
+        frame = delta_contrast * frame + self.brightness
+        frame = np.clip(frame, 0, 255).astype(np.uint8)
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+        frame[:, :, 1] = (frame[:, :, 1].astype(np.int) + self.saturation).clip(0, 255).astype(np.uint8)
+        frame = cv2.cvtColor(frame, cv2.COLOR_HSV2RGB)
         return frame
+
+    def save(self):
+        if not self.dlg:
+            return {}
+        self.get_sliders()
+        return {"brightness": self.brightness,
+                "contrast": self.contrast,
+                "saturation": self.saturation}
+
+    def load(self, plugin_state):
+        self.brightness = plugin_state.get("brightness", 0)
+        self.contrast = plugin_state.get("contrast", 0)
+        self.saturation = plugin_state.get("saturation", 0)
+        if self.dlg:
+            self.set_sliders()
+
+    def set_sliders(self):
+        self.dlg.brightness_slider.setValue(self.brightness)
+        self.dlg.contrast_slider.setValue(self.contrast)
+        self.dlg.saturation_slider.setValue(self.saturation)
+
+    def get_sliders(self):
+        self.brightness = self.dlg.brightness_slider.value()
+        self.contrast = self.dlg.contrast_slider.value()
+        self.saturation = self.dlg.saturation_slider.value()
 
 
 class AdjustmentsDialog(QDialog):
