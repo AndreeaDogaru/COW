@@ -16,5 +16,5 @@ class DemoPlugin(Plugin):
         dlg.exec_()
 
     def process(self, frame):
-        return (frame * 0.5).astype(np.uint8)
+        return (frame * 0.99).astype(np.uint8)
 
