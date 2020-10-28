@@ -9,8 +9,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import *
 
-from source.main import VirtualCamera
-from source.plugins.plugin import get_plugin_groups
+from main import VirtualCamera
+from plugins.plugin import get_plugin_groups
 
 
 class MainWindow(QMainWindow):

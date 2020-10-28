@@ -1,5 +1,5 @@
-from source.plugins.plugin import Plugin, PluginAction
-from source.utils import crop_center, get_latest_file
+from plugins.plugin import Plugin, PluginAction
+from utils import crop_center, get_latest_file
 
 from PyQt5 import QtWidgets
 

@@ -10,21 +10,10 @@ Before you begin writing code, it is important that you share your intention to 
 
 Issues are very valuable to this project.
 
-* Ideas are a valuable source of contributions others can make
+* Ideas are an important source of contributions others can make
 * Problems show where this project is lacking
 * With a question you show where contributors can improve the user experience
 
 ## Development environment 
 
-1. Prepare python environment using [Anaconda](https://www.anaconda.com/products/individual).
-```
-conda create -n cow python=3.7
-conda activate cow
-conda install -c conda-forge opencv 
-pip install pyfakewebcam
-```
-
-2. Install  **v4l2loopback**.
-```
-sudo apt install v4l2loopback-dkms
-```
+Prepare the development environment as described in the [instructions](README.md).
