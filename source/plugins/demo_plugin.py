@@ -1,4 +1,4 @@
-from source.plugins.plugin import Plugin, PluginAction
+from plugins.plugin import Plugin, PluginAction
 from PyQt5.QtWidgets import QDialog
 import numpy as np
 

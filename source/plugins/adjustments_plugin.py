@@ -1,4 +1,4 @@
-from source.plugins.plugin import Plugin, PluginAction
+from plugins.plugin import Plugin, PluginAction
 import numpy as np
 import cv2
 

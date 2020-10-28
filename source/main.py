@@ -7,7 +7,7 @@ import cv2
 import threading
 import os
 
-from source.plugins.plugin import get_plugins, make_chain_process
+from plugins.plugin import get_plugins, make_chain_process
 
 
 class VirtualCamera:

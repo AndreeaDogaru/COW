@@ -1,6 +1,6 @@
 import cv2
 
-from source.plugins.plugin import Plugin, PluginAction
+from plugins.plugin import Plugin, PluginAction
 import time
 
 
