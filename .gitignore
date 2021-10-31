@@ -1,4 +1,4 @@
 .idea
 **/__pycache__/
 *.conf
-source/plugins/plugin_data/*
+source/plugin_data/*
