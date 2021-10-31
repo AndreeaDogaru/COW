@@ -1,4 +1,4 @@
-from plugins.plugin import Plugin, PluginAction
+from plugin import Plugin, PluginAction
 from utils import crop_center, get_latest_file, ToggleLink
 
 from PyQt5 import QtWidgets
@@ -26,7 +26,7 @@ class SegmentationPlugin(Plugin):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
         self.scale_factor = 1 / 4
-        self.path = 'plugins/plugin_data/SegmentationPlugin'
+        self.path = 'plugin_data/SegmentationPlugin'
         os.makedirs(self.path, exist_ok=True)
         self.background_path = None
         self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)

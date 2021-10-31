@@ -1,8 +1,9 @@
-from collections import namedtuple
+from typing import List
+
 import importlib
 import inspect
-import os
-from typing import List
+from pathlib import Path
+from collections import namedtuple
 
 
 def get_plugin_groups(block_list):
@@ -13,19 +14,29 @@ def get_plugin_groups(block_list):
 
 
 def get_plugins(block_list):
-    block = set(block_list + ["plugin"])
+    block = set(block_list + ["plugin", "__pycache__"])
     plugins = []
-    for filename in os.listdir("plugins"):
-        if filename.endswith(".py"):
-            module_name = filename[:-3]
-            if not (module_name in block):
-                module = importlib.import_module(f"plugins.{module_name}")
-                members = inspect.getmembers(module, inspect.isclass)
-                plugin = [m[1] for m in members
-                          if m[1].__module__.endswith(module_name) and issubclass(m[1], Plugin)][0]()
-                plugins.append(plugin)
+    for plugin_path in Path("plugins").iterdir():
+        module_name = plugin_path.stem
+        if module_name in block:
+            continue
+        if plugin_path.is_dir() and not (plugin_path / f"{module_name}.py").exists():
+            continue
+        if plugin_path.suffix == ".py":
+            plugin = load_plugin_from_module(module_name)  
+        else:  # directory
+            plugin = load_plugin_from_module(f"{module_name}.{module_name}")
+        plugins.append(plugin)
+
     return plugins
 
+
+def load_plugin_from_module(module_name):
+    module = importlib.import_module(f"plugins.{module_name}")
+    members = inspect.getmembers(module, inspect.isclass)
+    plugin = [m[1] for m in members
+                if m[1].__module__.endswith(module_name) and issubclass(m[1], Plugin)][0]()
+    return plugin
 
 def add_plugin(plugin_groups, plugin):
     if plugin.group_name not in plugin_groups:

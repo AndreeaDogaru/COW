@@ -1,6 +1,6 @@
 import cv2
 
-from plugins.plugin import Plugin, PluginAction
+from plugin import Plugin, PluginAction
 import time
 
 from utils import ToggleLink
