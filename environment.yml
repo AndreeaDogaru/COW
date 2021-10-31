@@ -65,6 +65,7 @@ dependencies:
   - pyqt=5.9.2
   - python=3.7.9
   - python_abi=3.7
+  - python-mss=6.1.0
   - pytorch=1.6.0
   - qt=5.9.7
   - readline=8.0
