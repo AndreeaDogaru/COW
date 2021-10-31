@@ -3,24 +3,26 @@ import cv2
 from plugins.plugin import Plugin, PluginAction
 import time
 
+from utils import ToggleLink
+
 
 class FPSPlugin(Plugin):
     def __init__(self):
         super().__init__("FPS", "Misc")
-        self.display = False
+        self.display = ToggleLink()
         self.counter = 0
         self.last_time = time.time()
         self.update_time = 1
         self.fps = "?"
 
     def get_actions(self):
-        return [PluginAction("Display FPS", self.toggle_display, True)]
+        return [PluginAction("Display FPS", self.toggle_display, self.display)]
 
     def toggle_display(self, window):
-        self.display = not self.display
+        self.display.flip()
 
     def process(self, frame):
-        if self.display:
+        if self.display.get():
             frame = self.write_fps(frame)
         self.counter += 1
         current = time.time()
@@ -43,7 +45,7 @@ class FPSPlugin(Plugin):
         return frame
 
     def save(self):
-        return {"display": self.display}
+        return {"display": self.display.get()}
 
     def load(self, plugin_state):
-        self.display = plugin_state.get("display", False)
+        self.display.set(plugin_state.get("display", False))

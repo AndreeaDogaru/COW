@@ -1,5 +1,5 @@
 from plugins.plugin import Plugin, PluginAction
-from utils import crop_center, get_latest_file
+from utils import crop_center, get_latest_file, ToggleLink
 
 from PyQt5 import QtWidgets
 
@@ -18,7 +18,7 @@ class SegmentationPlugin(Plugin):
     def __init__(self):
         super().__init__("Segmentation", "Misc", z_index=-1)
         self.network = torchvision.models.segmentation.deeplabv3_resnet50(pretrained=True).eval()
-        self.display = False
+        self.display = ToggleLink()
         self.cuda = torch.cuda.is_available()
         self.preprocess = transforms.Compose([
             transforms.ToTensor(),
@@ -33,19 +33,19 @@ class SegmentationPlugin(Plugin):
         self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
 
     def toggle_display(self, window):
-        self.display = not self.display
+        self.display.flip()
 
     def get_actions(self):
-        return [PluginAction("Active", self.toggle_display, True),
+        return [PluginAction("Active", self.toggle_display, self.display),
                 PluginAction("Select background", self.select_background, False)]
 
     def save(self):
         return {"background_path": self.background_path,
-                "display": self.display}
+                "display": self.display.get()}
 
     def load(self, plugin_state):
         self.background_path = plugin_state.get("background_path", None)
-        self.display = plugin_state.get("display", False)
+        self.display.set(plugin_state.get("display", False))
 
         if self.background_path is not None:
             img = cv2.imread(self.background_path)
@@ -61,6 +61,7 @@ class SegmentationPlugin(Plugin):
             self.background_path = os.path.join(self.path, str(time.time()) + '.png')
             cv2.imwrite(self.background_path, img)
             self.background = img[:, :, ::-1]
+        self.display.set(True)
 
     def get_mask(self, input_image):
         input_tensor = self.preprocess(input_image)
@@ -74,7 +75,7 @@ class SegmentationPlugin(Plugin):
         return mask
 
     def process(self, frame):
-        if self.display:
+        if self.display.get():
             input_image = cv2.resize(frame, None, fx=self.scale_factor, fy=self.scale_factor)
             input_image = Image.fromarray(input_image)
             mask = self.get_mask(input_image)
