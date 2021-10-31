@@ -19,7 +19,7 @@ class ReactionsPlugin(Plugin):
 		self.dlg: ReactionsDialog = None
 		self.icon_size = (72, 72)
 		self.reactions = {0: Image.fromarray(np.zeros(self.icon_size + (4,), dtype=np.uint8))}
-		for i, file in enumerate(sorted(Path('plugins/reactions_plugin/openmoji-72x72-color').iterdir()), 1):
+		for i, file in enumerate(sorted(Path('plugin_data/ReactionsPlugin/emoji').iterdir()), 1):
 			self.reactions[i] = Image.open(file).convert("RGBA")
 		self.icon_padding = 25
 		self.icon_position = (slice(self.icon_padding, self.icon_size[0] + self.icon_padding),
@@ -77,7 +77,7 @@ class ReactionsDialog(QDialog):
 
 	# noinspection PyAttributeOutsideInit
 	def setup_ui(self):
-		self.setWindowTitle("Emojis")
+		self.setWindowTitle("Emoji")
 
 		self.layout = QtWidgets.QHBoxLayout()
 		self.scroll_area = QtWidgets.QScrollArea(self)
