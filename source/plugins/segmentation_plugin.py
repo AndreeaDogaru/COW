@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 import cv2
 import os
 import time
+import shutil
 from PIL import Image
 import numpy as np
 
@@ -60,20 +61,38 @@ class SegmentationPlugin(Plugin):
         self.display.set(plugin_state.get("display", False))
         self.use_cuda.set(plugin_state.get("use_cuda", False) and torch.cuda.is_available())
 
-        if self.background_path is not None:
-            img = cv2.imread(self.background_path)
-            self.background = img[:, :, ::-1]
+        self.load_background(self.background_path)
+
+    def load_background(self, file_path):
+        if file_path is not None:
+            img = cv2.imread(file_path)
+            if img is not None:
+                self.background = img
+                return True
+            else:
+                video = cv2.VideoCapture(file_path)
+                if video.isOpened():
+                    self.background = video
+                    return True
+        self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
+        return False
+
+    def get_background_frame(self):
+        if isinstance(self.background, cv2.VideoCapture):
+            ret, frame = self.background.read()
+            if ret:
+                return frame
+            else:
+                self.load_background(self.background_path)
+                return self.get_background_frame()
         else:
-            self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
+            return self.background
 
     def select_background(self, window):
-        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(window, "Select Image", "",
-                                                             "Image Files (*.png *.jpg *.jpeg *.JPEG)")
-        if file_name:
-            img = cv2.imread(file_name)
-            self.background_path = os.path.join(self.path, str(time.time()) + '.png')
-            cv2.imwrite(self.background_path, img)
-            self.background = img[:, :, ::-1]
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(window, "Select Image or Video", "")
+        if self.load_background(file_name):
+            self.background_path = os.path.join(self.path, str(time.time()) + os.path.splitext(file_name)[1])
+            shutil.copy(file_name, self.background_path)
         self.display.set(True)
 
     def get_mask(self, input_image):
@@ -98,8 +117,9 @@ class SegmentationPlugin(Plugin):
             kernel = kernel / kernel.sum()
             mask = cv2.filter2D(mask, -1, kernel)
             mask = Image.fromarray(mask)
-            if self.background.shape != frame.shape:
-                self.background = np.array(crop_center(Image.fromarray(self.background), *frame.shape[:2][::-1]))
-            frame = np.array(Image.composite(Image.fromarray(frame), Image.fromarray(self.background), mask))
+            background = self.get_background_frame()[:, ::-1, ::-1]
+            if background.shape != frame.shape:
+                background = np.array(crop_center(Image.fromarray(background), *frame.shape[:2][::-1]))
+            frame = np.array(Image.composite(Image.fromarray(frame), Image.fromarray(background), mask))
         return frame
 
