@@ -65,6 +65,7 @@ class VirtualCamera:
             self.fake_camera = None
 
     def open_port(self, port):
+        Popen("sudo -S modprobe -r v4l2loopback".split()).wait()
         if not os.path.exists(f"/dev/video{port}"):
             proc = Popen(
                 f'sudo -S /usr/sbin/modprobe v4l2loopback devices=1 video_nr={port} card_label="cow" exclusive_caps=1'.split())
@@ -89,6 +90,6 @@ if __name__ == "__main__":
     OUTPUT = 20
 
     virtual = VirtualCamera()
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         load_config(virtual, sys.argv[1])
     virtual.start_stream(INPUT, OUTPUT)
