@@ -2,3 +2,4 @@ wget https://github.com/hfg-gmuend/openmoji/releases/latest/download/openmoji-72
 mkdir ./plugin_data/ReactionsPlugin/emoji
 unzip ./plugin_data/ReactionsPlugin/openmoji-72x72-color.zip -d ./plugin_data/ReactionsPlugin/emoji
 rm ./plugin_data/ReactionsPlugin/openmoji-72x72-color.zip
+wget https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/data/openmoji.json -P ./plugin_data/ReactionsPlugin
