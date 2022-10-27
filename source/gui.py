@@ -146,7 +146,9 @@ class MainWindow(QMainWindow):
         if self.in_port == -1:
             return False
         self.virtual_camera.start_stream(self.in_port, self.out_port)
+        self.start_preview()
 
+    def start_preview(self):
         self.capture = cv2.VideoCapture(self.out_port)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_size.width())
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_size.height())

@@ -45,8 +45,10 @@ class VirtualCamera:
     def stream_step(self):
         try:
             _, frame = self.camera_input.read()
-            frame = frame[:, :, ::-1]
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = cv2.flip(frame, 1)  # Mirror
             processed_frame = self._virtual_mapping(frame)
+            processed_frame = cv2.flip(processed_frame, 1)  # Mirror back
         except Exception as e:
             print(e)
         self.fake_camera.schedule_frame(processed_frame)
