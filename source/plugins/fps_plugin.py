@@ -39,9 +39,7 @@ class FPSPlugin(Plugin):
         font_scale = 0.6
         font_color = (255, 255, 255)
         line_type = 2
-        frame = cv2.flip(frame, 1)
         frame = cv2.putText(frame, self.fps, xy, font, font_scale, font_color, lineType=line_type)
-        frame = cv2.flip(frame, 1)
         return frame
 
     def save(self):
