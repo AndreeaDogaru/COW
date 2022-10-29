@@ -1,6 +1,8 @@
 import glob
 import os
 
+from PyQt5 import QtWidgets, QtCore
+
 
 def crop_center(pil_img, crop_width, crop_height):
     img_width, img_height = pil_img.size
@@ -44,3 +46,24 @@ class ToggleLink(ObservableValue):
 
     def flip(self):
         self.set(not self.get())
+
+
+def create_adjustment_slider(mini, maxi, step=1):
+    slider = QtWidgets.QSlider()
+    slider.setEnabled(True)
+    slider.setMinimum(mini)
+    slider.setMaximum(maxi)
+    slider.setTracking(True)
+    slider.setOrientation(QtCore.Qt.Horizontal)
+    slider.setTickInterval(step)
+    slider.setSingleStep(step)
+    if step != 1:
+        def reposition():
+            val = slider.value()
+            if (val - mini) % step != 0:
+                val += step - (val - mini) % step
+            slider.setValue(val)
+
+        slider.valueChanged.connect(reposition)
+    slider.setTickPosition(QtWidgets.QSlider.TickPosition(2))
+    return slider

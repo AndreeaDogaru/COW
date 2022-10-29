@@ -8,7 +8,7 @@ from utils import ToggleLink
 
 class FPSPlugin(Plugin):
     def __init__(self):
-        super().__init__("FPS", "Misc")
+        super().__init__("FPS", "Misc", z_index=1000)
         self.display = ToggleLink()
         self.counter = 0
         self.last_time = time.time()
