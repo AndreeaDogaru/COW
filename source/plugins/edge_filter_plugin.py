@@ -6,9 +6,8 @@ from PyQt5.QtWidgets import QDialog
 from PyQt5 import QtWidgets, QtCore
 
 from plugin import Plugin, PluginAction
-from source.utils import create_adjustment_slider
 
-from utils import ToggleLink
+from utils import ToggleLink, create_adjustment_slider
 
 
 class EdgeFilterPlugin(Plugin):
