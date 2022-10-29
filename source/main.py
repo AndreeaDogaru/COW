@@ -11,7 +11,7 @@ from plugin import get_plugins, make_chain_process
 
 
 class VirtualCamera:
-    def __init__(self, pref_resolution=(1920, 1080)):
+    def __init__(self, pref_resolution=(640, 360)):
         self.fake_camera = None
         self.pref_resolution = pref_resolution
         self.current_resolution = self.pref_resolution
