@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import *
 
-from main import VirtualCamera
+from main import VirtualCamera, get_available_resolutions
 from plugin import get_plugin_groups
 from utils import ToggleLink
 
@@ -40,14 +40,26 @@ class MainWindow(QMainWindow):
         _ = self.create_file_actions(main_menu)
         camera_menu = main_menu.addMenu('Camera')
         cams = list(filter(lambda x: x[1] != self.out_port, list_cams())) + [("None", -1)]
+        all_resolutions = [get_available_resolutions(port) for _, port in cams]
         print(cams)
-        for cam in cams:
-            action = QAction(cam[0], self)
-            action.setStatusTip('Choose this input camera')
-            action.triggered.connect(partial(self.choose_camera, cam))
-            camera_menu.addAction(action)
+        for (name, port), resolutions in zip(cams, all_resolutions):
+            resolutions = get_available_resolutions(port)
+            print(name, resolutions)
+            if len(resolutions) == 0:
+                continue
+
+            sub_menu = camera_menu.addMenu(name)
+            for fmt, w, h in resolutions:
+                action = QAction(f"{fmt}: {w}x{h}", self)
+                action.setStatusTip('Choose this input resolution')
+                action.triggered.connect(partial(self.choose_camera, (name, port), (fmt, w, h)))
+                sub_menu.addAction(action)
+        # Add None action
+        action = QAction("None", self)
+        action.triggered.connect(partial(self.choose_camera, ("None", -1), None))
+        camera_menu.addAction(action)
         if len(cams) > 0:
-            self.choose_camera(cams[0])
+            self.choose_camera(cams[0], all_resolutions[0][0])
         return main_menu
 
     def create_file_actions(self, main_menu):
@@ -122,14 +134,14 @@ class MainWindow(QMainWindow):
             out = plugin.process(out)
         return out
 
-    def choose_camera(self, cam):
+    def choose_camera(self, cam, resolution):
         self.release_camera()
         if cam[1] != -1:
             self.virtual_camera.stop_stream()
-        if valid_camera(cam):
-            self.setup_camera(cam)
-        else:
-            print("Invalid input camera")
+            if valid_camera(cam):
+                self.setup_camera(cam, resolution)
+            else:
+                print("Invalid input camera")
 
     def setup_ui(self):
         """Initialize widgets.
@@ -141,23 +153,27 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.image_label)
 
         self.central.setLayout(self.main_layout)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
 
-    def setup_camera(self, cam):
+    def setup_camera(self, cam, resolution):
         """Initialize camera.
         """
         self.in_port = cam[1]
         if self.in_port == -1:
             return False
-        self.virtual_camera.start_stream(self.in_port, self.out_port)
+        self.virtual_camera.start_stream(self.in_port, self.out_port, resolution)
         self.start_preview()
 
     def start_preview(self):
         self.capture = cv2.VideoCapture(self.out_port)
+        self.video_size = QSize(*self.virtual_camera.current_resolution)
+
+        self.image_label.setFixedSize(self.video_size)
+        self.central.setFixedSize(self.central.sizeHint())
+        self.setFixedSize(self.sizeHint())
+
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.video_size.width())
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.video_size.height())
-
-        self.video_size = QSize(*self.virtual_camera.current_resolution)
-        self.image_label.setFixedSize(self.video_size)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.display_video_stream)
