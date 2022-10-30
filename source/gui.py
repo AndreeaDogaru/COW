@@ -13,6 +13,8 @@ from main import VirtualCamera
 from plugin import get_plugin_groups
 from utils import ToggleLink
 
+import qdarkstyle
+
 
 class MainWindow(QMainWindow):
 
@@ -213,6 +215,7 @@ def valid_camera(cam):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())
