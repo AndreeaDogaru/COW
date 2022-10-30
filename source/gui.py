@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         self.capture = None
         self.out_port = out_port
         self.in_port = -1
+        self.mirrored_output = True
         self.virtual_camera = VirtualCamera()
 
         self.central = QWidget()
@@ -172,7 +173,8 @@ class MainWindow(QMainWindow):
         """
         _, frame = self.capture.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.flip(frame, 1)
+        if self.mirrored_output:
+            frame = cv2.flip(frame, 1)
         image = QImage(frame, frame.shape[1], frame.shape[0],
                        frame.strides[0], QImage.Format_RGB888)
         self.image_label.setPixmap(QPixmap.fromImage(image))
