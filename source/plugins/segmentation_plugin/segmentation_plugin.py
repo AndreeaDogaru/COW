@@ -35,7 +35,7 @@ class SegmentationPlugin(Plugin):
             map_location=torch.device("cpu")))
         self.network.eval()
         self.background_path = None
-        self.background = np.random.randint(0, 255, (1920, 1080, 3), np.uint8)
+        self.background = np.random.randint(0, 255, (1080, 1920, 3), np.uint8)
         self.device_mapping = {True: "cuda", False: "cpu"}
 
     def toggle_display(self, window):
